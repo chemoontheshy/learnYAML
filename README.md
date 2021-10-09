@@ -1,437 +1,140 @@
-# C++语法基础补充
+# 学习YAML的使用
 
-目录
+## 目录
 
-- 目录
-- 编译信息
-- 基本文件结构
-- 最简单的编译
-- 同时编译多个文件
-- 编译静态
-- 编译动态
-- 引用静态库
-- 引用动态库
-- 混合
-- 标准化
-- 其他
+- [目录](##目录)
+- [编译信息](##编译信息)
+- [YAML在Windows上使用(编译)](##YAML在Windows上使用(编译))
+- [YAML在Linux上使用（编译）](##YAML在Linux上使用（编译）)
+- [C++读写YAML文件](##C++读写YAML文件)
 
 ## 编译信息
 
 作者：xzf
 
-创建时间：2021/10/08
+创建时间：2021/10/09
 
-更新时间：2021/10/08
+更新时间：2021/10/09
 
 ## 说明
 
-本文主要说明，基于 [cmake-example](https://github.com/ttroy50/cmake-examples) 的简单学习 cmake 的用法。在Linux系统上使用cmake编译c++，
+本文主要说明，简单学习 YAML 的用法。
 
-环境：`Linux xzf-linux 5.11.0-37-generic #41~20.04.2-Ubuntu SMP Fri Sep 24 09:06:38 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux`
+验证通过的环境：
+
+- Linux: `Linux xzf-linux 5.11.0-37-generic #41~20.04.2-Ubuntu SMP Fri Sep 24 09:06:38 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux`
+- Window: `Microsoft Windows [版本 10.0.19042.1165]`
+- [yaml-cpp 版本](https://github.com/jbeder/yaml-cpp)
+- cmake 版本：3.20.5
+
+## YAML在Windows上使用(编译)
+
+事前准备:
+
+- 安装 [cmake](https://cmake.org/) 
+- 下载[yaml-cpp源码](https://github.com/jbeder/yaml-cpp)
+
+编译：
+
+1. 打开cmake
+
+   ![](img\yaml_1.png)
+
+2. 选择路径：
+
+   - Where is the source code：
+   - Where to build the binaries：
+   - 其中 **build** 为自己新建的文件夹，生成的中间产物都在这个文件。
+
+   ![](img\yaml_2.png)
+
+3. 点击 **“Configure”** 会弹出选择的vs版本和系统。
+
+   ![](img\yaml_5.png)
+
+4. 完成上一步后会出现配置文件。如果要生成动态库需要在下图的框选的地方打勾✔，默认只生成静态库。
+
+   ![](img\yaml_6.png)
+
+5. 选择好后，再次点击 **“Configure”**。
+
+6. 点击 **“Generate”** ，会有生成的工程文件。
+
+7. 进入刚刚选择的 **build** 文件夹，点击 `YAML_CPP.sln`。
+
+8. 右键ALL_BUILD，点击生成，Debug和release版本都点击。
+
+9. 在 **“输出”** 的窗口查看可以知道生成的静态库或者动态库的位置。
+
+   ![](img\yaml_9.png)
+
+10. 头文件可以在源文件下面的 **“include”**文件里复制。
 
 
 
-## 基本文件结构
+## YAML在Linux上使用（编译）
 
-- project (项目名称)
-  - lib（库生成的路径）
-  - bin (二进制可执行文件的路径)
-  - build (执行文件，中间产物，makefile)
-  - include (.h)(本文为了兼容，不采用分开，只会在引用第三方库的时候使用)
-  - src (h.,*.cpp 文件)
-  - 3rd (其他文件或者引用库)
-  - CMakeLists.txt (cmake的配置文件)
-- 执行编译命令
-  - cd build
-  - camke ..
-  - make
-
-
-
-## 最简单的编译
-
-### 1. 结构
+这个比较简单跟着官方步骤走就好。
 
 ```sh
-.
-├── bin
-├── build
-├── CMakeLists.txt
-└── src
-    └── main.cpp
-
+git clonehttps://github.com/jbeder/yaml-cpp.git
+# ...
+mkdir build
+cd build
+# (如果需要生成动态库需要增加 -DYAML_BUILD_SHARED_LIBS=ON)
+# camke -DYAML_BUILD_SHARED_LIBS=ON ..
+camke ..
 ```
 
+需要注意的是生成动态库的时候，执行程序的时候，需要的是带版本的so。
 
 
-### 2. CMakeLists.txt
 
-```cmake
-#Set the munimum version of CMake that can be used
-cmake_minimum_required(VERSION 3.5)
+## C++读写YAML文件
 
-#set the project name
-project (hello_cmake)
+配置文件 `config.yaml`:
 
-SET(SOURCES src/main.cpp)
-
-#Add an executalbe
-add_executable(hello_cmake ${SOURCES})
-
-#Output path
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+```yaml
+name: taka
+sex: male
+age: 18
+delete: delete
 ```
 
-
-
-### 3. src
-
-**main.cpp**
+`main.cpp`：
 
 ```cpp
+#include <yaml-cpp/yaml.h>
 #include <iostream>
-  
+#include <string>
+#include <fstream>
+
+using namespace std;
+
 int main()
 {
-        std::cout<< "Hello Cmake!"<<std::endl;
-        return 0;
+	//read
+	YAML::Node config = YAML::LoadFile("config.yaml");
+	cout << "name: " << config["name"].as<string>() << endl;
+	cout << "sex: " << config["sex"].as<string>() << endl;
+	cout << "age: " << config["age"].as<int>() << endl;
+	cout << "delete: " << config["delete"].as<string>() << endl;
+
+	std::ofstream fout("config.yaml");
+
+	//add
+	config["add"] = "add";
+
+	//change
+	config["age"] = 25;
+
+	//delete
+	config.remove("delete");
+
+	//write
+	fout << config << endl;
+	fout.close();
+	return 0;
 }
-
 ```
 
-
-
-## 多文件的编译
-
-### 1. 结构
-
-```sh
-.
-├── bin
-├── build
-├── CMakeLists.txt
-└── src
-    ├── Hello.cpp
-    ├── Hello.h
-    └── main.cpp
-
-```
-
-
-
-### 2. CMakeLists.txt
-
-```cmake
-# Set the munimum version of CMake that can be used
-cmake_minimum_required(VERSION 3.5)
-
-# Set the project name
-project(hello_headers)
-
-# Output path
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin )
-
-# Add .cpp
-SET(SOURCES
-        src/Hello.cpp
-        src/main.cpp)
-
-#Add an executalble
-add_executable(hello_headers ${SOURCES})
-
-#include .h
-target_include_directories(hello_headers
-                PRIVATE
-                       ${PROJECT_SOURCE_DIR}/src
-)
-
-
-```
-
-
-
-### 3. main.cpp
-
-**Hello.h**
-
-```cpp
-#ifndef __HELLO_H__
-#define __HELLO_H__
-
-class Hello
-{
-public:
-	void print();
-
-};
-
-#endif
-```
-
-**Hello.cpp**
-
-```cpp
-#include <iostream>
-  
-#include "Hello.h"
-
-void Hello::print()
-{
-        std::cout<<"hello Headers!"<<std::endl;
-}
-
-```
-
-**main.cpp**
-
-```cpp
-#include <iostream>
-  
-int main()
-{
-        std::cout<< "Hello Cmake!"<<std::endl;
-        return 0;
-}
-
-```
-
-
-
-## 编译静态库
-
-### 1. 结构
-
-```sh
-.
-├── bin
-├── build
-├── CMakeLists.txt
-└── src
-    ├── Hello.cpp
-    ├── Hello.h
-    └── main.cpp
-
-```
-
-
-
-### 2. CMakeLists.txt
-
-```cmake
-# Set the munimum version of CMake that can be used
-cmake_minimum_required(VERSION 3.5)
-
-# Set the project name
-project(hello)
-
-# Output path
-# Shared
-# SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/hello/lib )
-# static
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/hello/lib )
-
-# Add library
-add_library(hello STATIC
-        src/Hello.cpp
-)
-
-#include .h
-target_include_directories(hello
-        PUBLIC
-                ${PROJECT_SOURCE_DIR}/include
-)
-
-#Copy include to the output path
-file(COPY ${PROJECT_SOURCE_DIR}/include DESTINATION  ${PROJECT_SOURCE_DIR}/hello/)
-
-```
-
-
-
-## 编译动态库
-
-基本和静态库编译一样，只是CMakeLists.txt的不同
-
-### 1. 结构
-
-```sh
-.
-├── bin
-├── build
-├── CMakeLists.txt
-└── src
-    ├── Hello.cpp
-    ├── Hello.h
-    └── main.cpp
-```
-
-
-
-### 2. CMakeLists.txt
-
-```cmake
-# Set the munimum version of CMake that can be used
-cmake_minimum_required(VERSION 3.5)
-
-# Set the project name
-project(hello)
-
-# Output path
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/hello/lib )
-
-# Add library
-add_library(hello SHARED
-        src/Hello.cpp
-)
-
-#include .h
-target_include_directories(hello
-        PUBLIC
-                ${PROJECT_SOURCE_DIR}/include
-)
-
-#Copy include to the output path
-file(COPY ${PROJECT_SOURCE_DIR}/include DESTINATION  ${PROJECT_SOURCE_DIR}/hello/)
-
-```
-
-
-
-
-
-## 调用静态库
-
-### 1. 结构
-
-```sh
-.
-├── 3rd
-│   ├── include
-│   │   └── Hello.h
-│   └── lib
-│       └── libhello.a
-├── bin
-├── build
-├── CMakeLists.txt
-└── src
-    └── main.cpp
-
-```
-
-
-
-### 2. CMakeLists.txt
-
-`特别注意：引入头文件和库要在生成exe之前`
-
-```cmake
-# Set the munimum version of CMake that can be used
-cmake_minimum_required(VERSION 3.5)
-
-# Set the project name
-project(hello_static)
-
-# Output path
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-
-SET(3RD ${PROJECT_SOURCE_DIR}/3rd)
-
-# link include
-INCLUDE_DIRECTORIES(${3RD}/include)
-
-# link lib
-LINK_DIRECTORIES(${3RD}/lib)
-
-
-# Add an executable with the above sources
-add_executable(hello_static
-        src/main.cpp
-)
-
-target_link_libraries(hello_static hello)
-
-```
-
-
-
-## 调用静态库
-
-`调用动态基本和静态库是一样的`
-
-
-
-## 混合编译
-
-### 1. 结构
-
-```sh
-.
-├── 3rd
-│   ├── include
-│   │   └── Hello.h
-│   └── lib
-│       └── libhello.so
-├── bin
-├── build
-├── CMakeLists.txt
-└── src
-    ├── cmix.cpp
-    ├── cmix.h
-    └── main.cpp
-
-```
-
-
-
-### 2. CMakeLists.txt
-
-`特别注意：引入头文件和库要在生成exe之前`
-
-```cmake
-# Set the munimum version of CMake that can be used
-cmake_minimum_required(VERSION 3.5)
-
-# Set the project name
-project(hello_cmix)
-
-# Output path
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-
-SET(3RD ${PROJECT_SOURCE_DIR}/3rd)
-
-# link include
-INCLUDE_DIRECTORIES(${3RD}/include)
-
-# link lib
-LINK_DIRECTORIES(${3RD}/lib)
-
-
-# Add an executable with the above sources
-add_executable(hello_cmix
-        src/main.cpp
-        src/cmix.cpp
-)
-
-#include .h
-target_include_directories(hello_cmix
-        PRIVATE
-                ${PROJECT_SOURCE_DIR}/src
-)
-
-#link the shared
-target_link_libraries(hello_cmix hello)
-
-
-```
-
-
-
-## 标准化
-
-待写
-
-
-
-## 其他
-
-待写
