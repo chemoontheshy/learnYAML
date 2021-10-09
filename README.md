@@ -46,15 +46,15 @@
    - Where to build the binaries：
    - 其中 **build** 为自己新建的文件夹，生成的中间产物都在这个文件。
 
-   ![](img\yaml_2.png)
+   ![](https://github.com/chemoontheshy/learnYAML/blob/master/img/yaml_2.png)
 
 3. 点击 **“Configure”** 会弹出选择的vs版本和系统。
 
-   ![](img\yaml_5.png)
+   ![](https://github.com/chemoontheshy/learnYAML/blob/master/img/yaml_5.png)
 
 4. 完成上一步后会出现配置文件。如果要生成动态库需要在下图的框选的地方打勾✔，默认只生成静态库。
 
-   ![](img\yaml_6.png)
+   ![](https://github.com/chemoontheshy/learnYAML/blob/master/img/yaml_6.png)
 
 5. 选择好后，再次点击 **“Configure”**。
 
@@ -66,7 +66,7 @@
 
 9. 在 **“输出”** 的窗口查看可以知道生成的静态库或者动态库的位置。
 
-   ![](img\yaml_9.png)
+   ![](https://github.com/chemoontheshy/learnYAML/blob/master/img/yaml_9.png)
 
 10. 头文件可以在源文件下面的 **“include”**文件里复制。
 
