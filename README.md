@@ -38,7 +38,7 @@
 
 1. 打开cmake
 
-   ![](img\yaml_1.png)
+   ![](https://github.com/chemoontheshy/learnYAML/blob/master/img/yaml_1.png)
 
 2. 选择路径：
 
